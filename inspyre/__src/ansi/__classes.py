@@ -13,7 +13,7 @@ class PredefinedColor:
         if not isinstance(value, str):
             raise TypeError(
                 f"PredefinedColor param 'value' must be type 'str'.")
-        verify_ansi_code(value)
+        # verify_ansi_code(value)
 
         self.__value = value
         self.__prev_value = value
@@ -159,3 +159,9 @@ class PredefinedColor:
         else:
             raise TypeError(
                 "PredefinedColor can only be added to strings or other PredefinedColors.")
+
+    def __str__(self) -> str:
+        return self.__value
+
+    def __repr__(self) -> str:
+        return f'PredefinedColor("{self.__value}")'
