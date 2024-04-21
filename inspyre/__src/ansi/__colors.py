@@ -11,7 +11,11 @@ from .__utils import verify_rgb_number_value
 
 
 # color funcs
-def format_text(txt: str, /, *formats: PredefinedColor) -> str:
+def format_text(
+        txt: str,
+        /,
+        *formats: PredefinedColor
+) -> str:
     """Formats a string with the color or styles given.
     Supports any predefined ANSI values from the TextColors, BGColors, and Styles classes.
 
@@ -39,10 +43,12 @@ def format_text(txt: str, /, *formats: PredefinedColor) -> str:
     return formatting + txt + RESET
 
 
-def colorize_by_rgb(txt: str,
-                    /,
-                    fg_color: Union[List[int], Tuple[int], None] = None,
-                    bg_color: Union[List[int], Tuple[int], None] = None) -> str:
+def colorize_by_rgb(
+        txt: str,
+        /,
+        fg_color: Union[List[int], Tuple[int], None] = None,
+        bg_color: Union[List[int], Tuple[int], None] = None
+) -> str:
     """Colorizes the text with the given foreground and background RGB values.
 
     :param txt: The text to be colorized.
@@ -90,6 +96,8 @@ def colorize_by_rgb(txt: str,
 
     return fg_formatting + bg_formatting + txt + RESET
 
+# TODO: other colorize funcs
+
 
 # color classes
 class TextColors:
@@ -98,7 +106,11 @@ class TextColors:
     """
 
     # methods
-    def is_color(self, color: str, /) -> bool:
+    def is_color(
+        self,
+        color: str,
+        /
+    ) -> bool:
         """Verifies if the given color name is a color in the class.
 
         :param color: The color to be verified.
@@ -112,7 +124,13 @@ class TextColors:
                 return True
         return False
 
-    def print_color_sample(self, color: str, /, *, msg: str = "This text is {color}.") -> None:
+    def print_color_sample(
+        self,
+        color: str,
+        /,
+        *,
+        msg: str = "This text is {color}."
+    ) -> None:
         """Prints a sample of the given color to the terminal.
 
         :param color: The color to be printed.
@@ -129,7 +147,11 @@ class TextColors:
         else:
             raise ValueError(f'{color} is not a valid color of TextColors.')
 
-    def compare_colors(self, *colors: str, msg: str = "This text is {color}.") -> None:
+    def compare_colors(
+        self,
+        *colors: str,
+        msg: str = "This text is {color}."
+    ) -> None:
         """Prints a simple of both colors side to side to compare them.
 
         :param colors: The colors to be compared.
@@ -310,7 +332,11 @@ class BGColors:
     """
 
     # methods
-    def is_color(self, color: str, /) -> bool:
+    def is_color(
+        self,
+        color: str,
+        /
+    ) -> bool:
         """Verifies if the given color name is a color in the class.
 
         :param color: The color to be verified.
@@ -324,7 +350,13 @@ class BGColors:
                 return True
         return False
 
-    def print_color_sample(self, color: str, /, *, msg: str = "This text is {color}.") -> None:
+    def print_color_sample(
+        self,
+        color: str,
+        /,
+        *,
+        msg: str = "This text is {color}."
+    ) -> None:
         """Prints a sample of the given color to the terminal.
 
         :param color: The color to be printed.
@@ -341,7 +373,11 @@ class BGColors:
         else:
             raise ValueError(f'{color} is not a valid color of TextColors.')
 
-    def compare_colors(self, *colors: str, msg: str = "This text is {color}.") -> None:
+    def compare_colors(
+        self,
+        *colors: str,
+        msg: str = "This text is {color}."
+    ) -> None:
         """Prints a simple of both colors side to side to compare them.
 
         :param colors: The colors to be compared.

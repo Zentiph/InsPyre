@@ -32,7 +32,10 @@ def rgb_bg(*rgb_value: Union[int, List[int], Tuple[int]]) -> str:
     return f'\x1b[48;2;{r};{g};{b}m'
 
 
-def hex_bg(hex_: str, /) -> str:
+def hex_bg(
+    hex_: str,
+    /
+) -> str:
     """Generates an ANSI escape code for colored text backgrounds using a hex value.
 
     :param hex_: The hexadecimal color value.

@@ -32,7 +32,10 @@ def rgb_text(*args: Union[int, List[int], Tuple[int]]) -> str:
     return f'\x1b[38;2;{r};{g};{b}m'
 
 
-def hex_text(hex_: str, /) -> str:
+def hex_text(
+    hex_: str,
+    /
+) -> str:
     """Generates an ANSI escape code for colored text using a hex value.
 
     :param hex_: The hexadecimal color value.

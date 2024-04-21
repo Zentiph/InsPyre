@@ -46,7 +46,11 @@ class PredefinedColor:
         self.__prev_value = self.__value
         self.__value = self.__original_value
 
-    def get_rgb(self, *, return_tuple: bool = False) -> Union[List[int], Tuple[int]]:
+    def get_rgb(
+        self,
+        *,
+        return_tuple: bool = False
+    ) -> Union[List[int], Tuple[int]]:
         """Get the RGB color code of the PredefinedColor.
 
         :param return_tuple: Determines whether to return a tuple or a list, defaults to False.
@@ -68,7 +72,11 @@ class PredefinedColor:
             raise ValueError(
                 f"Invalid color code format for {self!r}.value: {self.__value!r}. Expected format: '\\x1b[(3/4)8;2;r;g;bm'.")
 
-    def get_hex(self, *, include_hashtag: bool = True) -> str:
+    def get_hex(
+        self,
+        *,
+        include_hashtag: bool = True
+    ) -> str:
         """Get the hex color code of the PredefinedColor.
 
         :param include_hashtag: Determines whether to include the hashtag in the returned hex string or not, defaults to True.
@@ -86,7 +94,10 @@ class PredefinedColor:
             return '#{:02x}{:02x}{:02x}'.format(r, g, b)
         return '{:02x}{:02x}{:02x}'.format(r, g, b)
 
-    def change_brightness(self, percentage: float) -> None:
+    def change_brightness(
+        self,
+        percentage: float
+    ) -> None:
         """Adjust the brightness of the color by a specified percentage. Positive percentage increases the brightness, while negative percentage decreases it.
 
         :param percentage: The percentage to adjust the brightness by.
@@ -122,7 +133,10 @@ class PredefinedColor:
         self.__value = new_ansi_code
 
     # other can also be PredefinedColor but can't put it in type hints without raising an exception
-    def __add__(self, other: Union[str, PredefinedColor]) -> Union[str, PredefinedColor]:
+    def __add__(
+        self,
+        other: Union[str, PredefinedColor]
+    ) -> Union[str, PredefinedColor]:
         """Handle cases where a string or PredefinedColor is added to the PredefinedColor instance.
 
         :param other: The object being added to the PredefinedColor instance.
@@ -142,7 +156,10 @@ class PredefinedColor:
             raise TypeError(
                 "PredefinedColor can only be added to strings or other PredefinedColors.")
 
-    def __radd__(self, other: Union[str, PredefinedColor]) -> Union[str, PredefinedColor]:
+    def __radd__(
+        self,
+        other: Union[str, PredefinedColor]
+    ) -> Union[str, PredefinedColor]:
         """Handle cases where a PredefinedColor instance is added to a string or PredefinedColor.
 
         :param other: The object being added to the PredefinedColor instance.

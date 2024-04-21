@@ -5,7 +5,10 @@ from .__classes import PredefinedColor
 from .__utils import verify_rgb_number_value, verify_hex_number_value
 
 
-def rgb_to_hex(*rgb_value: Union[int, List[int], Tuple[int]], include_hashtag: bool = True) -> str:
+def rgb_to_hex(
+    *rgb_value: Union[int, List[int], Tuple[int]],
+    include_hashtag: bool = True
+) -> str:
     """Converts an RGB color code to hexadecimal.
 
     :param rgb_value: The RGB value to convert. Accepts either three int values or a single List[int] or Tuple[int] with three values.
@@ -41,7 +44,12 @@ def rgb_to_hex(*rgb_value: Union[int, List[int], Tuple[int]], include_hashtag: b
         return '{:02x}{:02x}{:02x}'.format(r, g, b)
 
 
-def hex_to_rgb(hex_: str, /, *, return_tuple: bool = False) -> Union[List[int], Tuple[int]]:
+def hex_to_rgb(
+    hex_: str,
+    /,
+    *,
+    return_tuple: bool = False
+) -> Union[List[int], Tuple[int]]:
     """Converts a hexadecimal color code to RGB.
 
     :param hex_: The hexadecimal color value to convert.
@@ -69,8 +77,14 @@ def hex_to_rgb(hex_: str, /, *, return_tuple: bool = False) -> Union[List[int], 
     return list(int(hex_[i:i+2], 16) for i in (0, 2, 4))
 
 
-def get_colors(txt: str, /, *, return_hex: bool = False, include_reset: bool = False,
-               include_color_type: bool = False) -> List[Dict[str, Union[List[int], str]]]:
+def get_colors(
+    txt: str,
+    /,
+    *,
+    return_hex: bool = False,
+    include_reset: bool = False,
+    include_color_type: bool = False
+) -> List[Dict[str, Union[List[int], str]]]:
     """Gets all the colors in the given string and returns them in a list of dictionaries.
 
     :param txt: The text to parse.
@@ -129,7 +143,10 @@ def get_colors(txt: str, /, *, return_hex: bool = False, include_reset: bool = F
     return colors
 
 
-def remove_formatting(txt: str, /) -> str:
+def remove_formatting(
+    txt: str,
+    /
+) -> str:
     """Removes all color and style formatting from the string input.
 
     :param txt: The text to remove formatting from.
@@ -146,8 +163,14 @@ def remove_formatting(txt: str, /) -> str:
     return ansi_code_regex.sub('', txt)
 
 
-def gradient(txt: str, /, left_color: Union[List[int], Tuple[int], str, PredefinedColor],
-             right_color: Union[List[int], Tuple[int], str, PredefinedColor], *, color_type: str = 'FG') -> str:
+def gradient(
+    txt: str,
+    /,
+    left_color: Union[List[int], Tuple[int], str, PredefinedColor],
+    right_color: Union[List[int], Tuple[int], str, PredefinedColor],
+    *,
+    color_type: str = 'FG'
+) -> str:
     """Applies a gradient effect to the text. Automatically appends the RESET constant.
 
     :param txt: The text to apply the gradient on.
