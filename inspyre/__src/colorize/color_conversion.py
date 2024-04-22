@@ -322,7 +322,7 @@ def hsl_to_rgb(
         h, s, l = hsl_value
     else:
         raise TypeError(
-            "hsl_value accepts either three float values or a single List[float] or Tuple[float] with three values.")
+            "hsl_value accepts either three values or a single List or Tuple with three values.")
 
     if not isinstance(return_tuple, bool):
         raise TypeError(
@@ -389,7 +389,7 @@ def hsl_to_hex(
         h, s, l = hsl_value
     else:
         raise TypeError(
-            "hsl_value accepts either three float values or a single List[float] or Tuple[float] with three values.")
+            "hsl_value accepts either three values or a single List or Tuple with three values.")
 
     if not isinstance(include_hashtag, bool):
         raise TypeError(
@@ -437,7 +437,7 @@ def hsl_to_hsv(
         h, s, l = hsl_value
     else:
         raise TypeError(
-            "hsl_value accepts either three float values or a single List[float] or Tuple[float] with three values.")
+            "hsl_value accepts either three values or a single List or Tuple with three values.")
 
     if not isinstance(decimal_places, int):
         raise TypeError("'decimal_places' must be type 'int'.")
@@ -484,7 +484,7 @@ def hsv_to_rgb(
     :param return_tuple: Determines whether to return the colors as a tuple or a list, defaults to False.
     :type return_tuple: bool, optional
     :raises TypeError: If any of the arguments are not of the correct type.
-    :raises ValueError: If any of the values in hsv_value are not valid H, S, or L values.
+    :raises ValueError: If any of the values in hsv_value are not valid H, S, or V values.
     :return: The converted RGB values.
     :rtype: Union[List[int], Tuple[int]]
     """
@@ -551,7 +551,7 @@ def hsv_to_hex(
     :param include_hashtag: Determines whether to include the hashtag in the returned hex string or not, defaults to True.
     :type include_hashtag: bool, optional
     :raises TypeError: If any of the arguments are not of the correct type.
-    :raises ValueError: If any of the values in hsv_value are not valid H, S, or L values.
+    :raises ValueError: If any of the values in hsv_value are not valid H, S, or V values.
     :return: The converted hex value.
     :rtype: str
     """
@@ -561,12 +561,12 @@ def hsv_to_hex(
             if not isinstance(v, int) and not isinstance(v, float):
                 raise TypeError(
                     "Each hue, saturation, and lightness value must be 'int' or 'float'.")
-        h, s, l = hsv_value[0]
+        h, s, v = hsv_value[0]
     elif len(hsv_value) == 3 and (all(isinstance(arg, int) for arg in hsv_value) or all(isinstance(arg, float) for arg in hsv_value)):
-        h, s, l = hsv_value
+        h, s, v = hsv_value
     else:
         raise TypeError(
-            "hsv_value accepts either three float values or a single List[float] or Tuple[float] with three values.")
+            "hsv_value accepts either three values or a single List or Tuple with three values.")
 
     if not isinstance(include_hashtag, bool):
         raise TypeError(
@@ -574,12 +574,73 @@ def hsv_to_hex(
 
     h = float(h)
     s = float(s)
-    l = float(l)
-    verify_hsl_value(h, s, l)
-
-    r, g, b = hsl_to_rgb(hsv_value)
+    v = float(v)
+    verify_hsl_value(h, s, v)
+    r, g, b = hsv_to_rgb(h, s, v)
 
     if include_hashtag:
         return '#{:02x}{:02x}{:02x}'.format(r, g, b)
     else:
         return '{:02x}{:02x}{:02x}'.format(r, g, b)
+
+
+def hsv_to_hsl(
+    *hsv_value: Union[int, float, List[Union[int, float]], Tuple[Union[int, float]]],
+    decimal_places: int = 2,
+    return_tuple: bool = False
+) -> Union[List[float], Tuple[float]]:
+    """Converts an HSV color code to HSL.
+
+    :param hsv_value: The HSV color value to convert. Accepts either three separate values or a single List or Tuple with three values.
+    :type hsv_value: Union[int, float, List[Union[int, float]], Tuple[Union[int, float]]
+    :param decimal_places: The number of decimal places to round to, defaults to 2.
+    :type decimal_places: int, optional
+    :param return_tuple: Determines whether to return the colors as a tuple or a list, defaults to False.
+    :type return_tuple: bool, optional
+    :raises TypeError: If any of the arguments are not of the correct type.
+    :raises ValueError: If any of the values in hsv_value are not valid H, S, or V values.
+    :return: The converted HSL values.
+    :rtype: Union[List[float], Tuple[float]]
+    """
+
+    if len(hsv_value) == 1 and (isinstance(hsv_value[0], list) or isinstance(hsv_value[0], tuple)) and len(hsv_value[0]) == 3:
+        for v in hsv_value[0]:
+            if not isinstance(v, int) and not isinstance(v, float):
+                raise TypeError(
+                    "Each hue, saturation, and lightness value must be 'int' or 'float'.")
+        h, s, v = hsv_value[0]
+    elif len(hsv_value) == 3 and (all(isinstance(arg, int) for arg in hsv_value) or all(isinstance(arg, float) for arg in hsv_value)):
+        h, s, v = hsv_value
+    else:
+        raise TypeError(
+            "hsv_value accepts either three values or a single List or Tuple with three values.")
+
+    if not isinstance(decimal_places, int):
+        raise TypeError("'decimal_places' must be type 'int'.")
+    if not isinstance(return_tuple, bool):
+        raise TypeError("'return_tuple' must be type 'bool'.")
+
+    h = float(h)
+    s = float(s)
+    v = float(v)
+    verify_hsv_value(h, s, v)
+
+    s_prime = s / 100
+    v_prime = v / 100
+
+    lightness = v_prime * (1 - s_prime / 2)
+    if lightness in (0, 1):
+        saturation = 0
+    else:
+        saturation = (v_prime - lightness) / min(lightness, 1 - lightness)
+
+    lightness *= 100
+    saturation *= 100
+
+    if return_tuple:
+        return (round(h, decimal_places),
+                round(float(saturation), decimal_places),
+                round(float(lightness), decimal_places))
+    return [round(h, decimal_places),
+            round(float(saturation), decimal_places),
+            round(float(lightness), decimal_places)]
