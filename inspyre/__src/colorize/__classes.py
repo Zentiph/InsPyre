@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from typing import List, Tuple, Union
 
 from .__utils import verify_ansi_code
@@ -181,4 +182,4 @@ class PredefinedColor:
         return self.__value
 
     def __repr__(self) -> str:
-        return f'PredefinedColor("{self.__value}")'
+        return f'PredefinedColor("{repr(self.__value)}")'

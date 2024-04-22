@@ -1,1 +1,1 @@
-from .__src import ansi
+from .__src import colorize

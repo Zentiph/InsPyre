@@ -7,17 +7,20 @@ from typing import List, Tuple, Union
 
 from .__classes import PredefinedColor
 from .__constants import RESET
-from .__utils import verify_rgb_number_value
+from .color_conversion import hex_to_rgb
+from .__utils import (verify_hex_number_value, verify_hsl_value,
+                      verify_rgb_number_value)
 
 
 # color funcs
 def format_text(
-        txt: str,
-        /,
-        *formats: PredefinedColor
+    txt: str,
+    /,
+    *formats: PredefinedColor
 ) -> str:
     """Formats a string with the color or styles given.
-    Supports any predefined ANSI values from the TextColors, BGColors, and Styles classes.
+    Supports any predefined ANSI values from the TextColors, BGColors, and Styles classes,
+    as well as user defined ANSI values via the AnsiFormat class.
 
     :param txt: The text to be formatted.
     :type txt: str
@@ -44,19 +47,19 @@ def format_text(
 
 
 def colorize_by_rgb(
-        txt: str,
-        /,
-        fg_color: Union[List[int], Tuple[int], None] = None,
-        bg_color: Union[List[int], Tuple[int], None] = None
+    txt: str,
+    /,
+    fg: Union[List[int], Tuple[int], None] = None,
+    bg: Union[List[int], Tuple[int], None] = None
 ) -> str:
     """Colorizes the text with the given foreground and background RGB values.
 
     :param txt: The text to be colorized.
     :type txt: str
-    :param fg_color: The foreground RGB value, if desired, defaults to None
-    :type fg_color: Union[List[int], Tuple[int], None], optional
-    :param bg_color: The background RGB value, if desired, defaults to None
-    :type bg_color: Union[List[int], Tuple[int], None], optional
+    :param fg: The foreground RGB value, if desired, defaults to None
+    :type fg: Union[List[int], Tuple[int], None], optional
+    :param bg: The background RGB value, if desired, defaults to None
+    :type bg: Union[List[int], Tuple[int], None], optional
     :raises TypeError: If any of the arguments are not of the correct type.
     :raises ValueError: If the given List(s) or Tuple(s) is the incorrect length.
     :raises ValueError: If the given RGB values are out of the correct range.
@@ -68,16 +71,16 @@ def colorize_by_rgb(
     if not isinstance(txt, str):
         raise TypeError("'txt' must be type 'str'.")
 
-    for color in fg_color, bg_color:
+    for color in fg, bg:
         if not isinstance(color, list) and not isinstance(color, tuple) and color is not None:
             raise TypeError(
-                "'fg_color' and 'bg_color' must be type 'List[int]', 'Tuple[int]', or 'None'.")
+                "'fg' and 'bg' must be type 'List[int]', 'Tuple[int]', or 'None'.")
         if color is not None and len(color) != 3:
             raise ValueError(
-                "All RGB value arguments must be a 'List[int]' or 'Tuple[int]' of length 3.")
+                "All RGB value args must be a 'List[int]' or 'Tuple[int]' of length 3, or 'None'.")
 
-    if fg_color:
-        rf, gf, bf = fg_color
+    if fg:
+        rf, gf, bf = fg
         verify_rgb_number_value(rf)
         verify_rgb_number_value(gf)
         verify_rgb_number_value(bf)
@@ -85,11 +88,111 @@ def colorize_by_rgb(
     else:
         fg_formatting = ''
 
-    if bg_color:
-        rb, gb, bb = bg_color
+    if bg:
+        rb, gb, bb = bg
         verify_rgb_number_value(rb)
         verify_rgb_number_value(gb)
         verify_rgb_number_value(bb)
+        bg_formatting = f'\x1b[48;2;{rb};{gb};{bb}m'
+    else:
+        bg_formatting = ''
+
+    return fg_formatting + bg_formatting + txt + RESET
+
+
+def colorize_by_hex(
+    txt: str,
+    /,
+    fg: Union[str, None] = None,
+    bg: Union[str, None] = None
+) -> str:
+    """Colorizes the text with the given foreground and background hex values.
+
+    :param txt: The text to be colorized.
+    :type txt: str
+    :param fg: The foreground hex value, if desired, defaults to None
+    :type fg: Union[str, None], optional
+    :param bg: The background hex value, if desired, defaults to None
+    :type bg: Union[str, None], optional
+    :raises TypeError: If any of the arguments are not of the correct type.
+    :raises ValueError: If the given string(s) are the incorrect length.
+    :raises ValueError: If the given hex values are out of the correct range.
+    :return: The colorized text.
+    :rtype: str
+    """
+
+    # type checks
+    if not isinstance(txt, str):
+        raise TypeError("'txt' must be type 'str'.")
+
+    for color in fg, bg:
+        if not isinstance(color, str) and color is not None:
+            raise TypeError(
+                "'fg' and 'bg' must be type 'str' or 'None'.")
+        if color is not None and len(color) not in [6, 7]:
+            raise ValueError(
+                "All hex value arguments must be a 'str' of length 6 or 7, or 'None'.")
+
+    if fg:
+        verify_hex_number_value(fg)
+        rf, gf, bf = hex_to_rgb(fg)
+        fg_formatting = f'\x1b[38;2;{rf};{gf};{bf}m'
+    else:
+        fg_formatting = ''
+
+    if bg:
+        verify_hex_number_value(bg)
+        rb, gb, bb = hex_to_rgb(bg)
+        bg_formatting = f'\x1b[48;2;{rb};{gb};{bb}m'
+    else:
+        bg_formatting = ''
+
+    return fg_formatting + bg_formatting + txt + RESET
+
+
+def colorize_by_hsl(
+    txt: str,
+    /,
+    fg: Union[List[float], Tuple[float], None] = None,
+    bg: Union[List[float], Tuple[float], None] = None,
+) -> str:
+    """Colorizes the text with the given foreground and background HSL values.
+
+    :param txt: The text to be colorized.
+    :type txt: str
+    :param fg: The foreground HSL value, if desired, defaults to None
+    :type fg: Union[str, None], optional
+    :param bg: The background HSL value, if desired, defaults to None
+    :type bg: Union[str, None], optional
+    :raises TypeError: If any of the arguments are not of the correct type.
+    :raises ValueError: If the given string(s) are the incorrect length.
+    :raises ValueError: If the given HSL values are out of the correct range.
+    :return: The colorized text.
+    :rtype: str
+    """
+
+    # type checks
+    if not isinstance(txt, str):
+        raise TypeError("'txt' must be type 'str'.")
+
+    for color in fg, bg:
+        if not isinstance(color, list) and not isinstance(color, tuple) and color is not None:
+            raise TypeError(
+                "'fg' and 'bg' must be type 'List[float]', 'Tuple[float]', or 'None'.")
+        if color is not None and len(color) != 3:
+            raise ValueError(
+                "All HSL value arguments must be a 'List[float]' or 'Tuple[float]' of length 3, or 'None'.")
+
+    if fg:
+        verify_hsl_value(fg)
+        rf, gf, bf = hex_to_rgb(fg)
+        fg_formatting = f'\x1b[38;2;{rf};{gf};{bf}m'
+    else:
+        fg_formatting = ''
+
+    if bg:
+        verify_hsl_value(bg)
+        rb, gb, bb = hex_to_rgb(bg)
         bg_formatting = f'\x1b[48;2;{rb};{gb};{bb}m'
     else:
         bg_formatting = ''
@@ -100,12 +203,10 @@ def colorize_by_rgb(
 
 
 # color classes
-class TextColors:
-    """Contains text colors used for text formatting,
-    as well as a few searching and sampling methods.
+class ColorLib:
+    """Base class for color library classes.
     """
 
-    # methods
     def is_color(
         self,
         color: str,
@@ -135,24 +236,35 @@ class TextColors:
 
         :param color: The color to be printed.
         :type color: str
+        :raises ValueError: If the given color is not a color of the class.
+        :raises TypeError: If any of the arguments are not of the correct type.
         :param msg: The message to be printed. Place {color} in the message to print the color name.
         :type msg: str, optional
         """
 
-        color_name = color.replace(' ', '_').replace('-', '_').upper()
+        if not isinstance(msg, str):
+            raise TypeError("'msg' must be type 'str'.")
 
-        if self.is_color(color_name):
-            print(
-                f'{getattr(self.__class__, color_name)}{msg.format(color=color)}{RESET}')
+        if isinstance(color, str):
+            color_name = color.replace(' ', '_').replace('-', '_').upper()
+
+            if self.is_color(color_name):
+                print(
+                    f'{getattr(self.__class__, color_name)}{msg.format(color=color)}{RESET}')
+            else:
+                raise ValueError(
+                    f'{color} is not a valid color of {self.__class__.__name__}.')
+
         else:
-            raise ValueError(f'{color} is not a valid color of TextColors.')
+            raise TypeError(
+                f"'color' must be type 'str'.")
 
     def compare_colors(
         self,
         *colors: str,
         msg: str = "This text is {color}."
     ) -> None:
-        """Prints a simple of both colors side to side to compare them.
+        """Prints a sample of both colors side to side to compare them.
 
         :param colors: The colors to be compared.
         :type colors: str
@@ -163,7 +275,10 @@ class TextColors:
         for color in colors:
             self.print_color_sample(color, msg=msg)
 
-    # colors
+
+class TextColors(ColorLib):
+    """Text color library class.
+    """
 
     # reds
     MAROON = PredefinedColor('\x1b[38;2;128;0;0m')
@@ -326,70 +441,9 @@ class TextColors:
     BLACK = PredefinedColor('\x1b[38;2;0;0;0m')
 
 
-class BGColors:
-    """Contains background colors used for text formatting,
-    as well as a few searching and sampling methods.
+class BGColors(ColorLib):
+    """Background color library class.
     """
-
-    # methods
-    def is_color(
-        self,
-        color: str,
-        /
-    ) -> bool:
-        """Verifies if the given color name is a color in the class.
-
-        :param color: The color to be verified.
-        :type color: str
-        :return: The status of the verification.
-        :rtype: bool
-        """
-
-        for k in self.__class__.__dict__:
-            if color.upper() == k:
-                return True
-        return False
-
-    def print_color_sample(
-        self,
-        color: str,
-        /,
-        *,
-        msg: str = "This text is {color}."
-    ) -> None:
-        """Prints a sample of the given color to the terminal.
-
-        :param color: The color to be printed.
-        :type color: str
-        :param msg: The message to be printed. Place {color} in the message to print the color name.
-        :type msg: str, optional
-        """
-
-        color_name = color.replace(' ', '_').replace('-', '_').upper()
-
-        if self.is_color(color_name):
-            print(
-                f'{getattr(self.__class__, color_name)}{msg.format(color=color)}{RESET}')
-        else:
-            raise ValueError(f'{color} is not a valid color of TextColors.')
-
-    def compare_colors(
-        self,
-        *colors: str,
-        msg: str = "This text is {color}."
-    ) -> None:
-        """Prints a simple of both colors side to side to compare them.
-
-        :param colors: The colors to be compared.
-        :type colors: str
-        :param msg: The message to be printed. Place {color} in the message to print the color name.
-        :type msg: str, optional
-        """
-
-        for color in colors:
-            self.print_color_sample(color, msg=msg)
-
-    # colors
 
     # reds
     MAROON = PredefinedColor('\x1b[48;2;128;0;0m')

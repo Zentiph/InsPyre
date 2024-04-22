@@ -1,80 +1,11 @@
-from re import compile as re_compile, match as re_match, split as re_split
+from re import compile as re_compile
+from re import match as re_match
+from re import split as re_split
 from typing import Dict, List, Tuple, Union
 
 from .__classes import PredefinedColor
-from .__utils import verify_rgb_number_value, verify_hex_number_value
-
-
-def rgb_to_hex(
-    *rgb_value: Union[int, List[int], Tuple[int]],
-    include_hashtag: bool = True
-) -> str:
-    """Converts an RGB color code to hexadecimal.
-
-    :param rgb_value: The RGB value to convert. Accepts either three int values or a single List[int] or Tuple[int] with three values.
-    :type rgb_value: Union[int, List[int], Tuple[int]]
-    :param include_hashtag: Boolean indicating whether to include the hashtag in the returned hex string or not, defaults to True.
-    :type include_hashtag: bool, optional
-    :raises TypeError: If any of the arguments are not of the correct type.
-    :raises ValueError: If any of the values in rgb_value are not valid R, G, or B values.
-    :return: The converted hexadecimal value.
-    :rtype: str
-    """
-
-    # if rgb_value contains a single list with three ints
-    if len(rgb_value) == 1 and (isinstance(rgb_value[0], list) or isinstance(rgb_value[0], tuple)) and len(rgb_value[0]) == 3 and all(isinstance(rgb_value[0][v], int) for v in range(len(rgb_value[0]))):
-        r, g, b = rgb_value[0]
-    # if rgb_value contains three ints
-    elif len(rgb_value) == 3 and all(isinstance(arg, int) for arg in rgb_value):
-        r, g, b = rgb_value
-    else:
-        raise TypeError(
-            "rgb_to_hex accepts either three int values or a single list[int] or tuple[int] with three values.")
-
-    if not isinstance(include_hashtag, bool):
-        raise TypeError(
-            "rgb_to_hex param 'include_hashtag' must be type 'bool'.")
-
-    for color in (r, g, b):
-        verify_rgb_number_value(color)
-
-    if include_hashtag:
-        return '#{:02x}{:02x}{:02x}'.format(r, g, b)  # taken from educative.io
-    else:
-        return '{:02x}{:02x}{:02x}'.format(r, g, b)
-
-
-def hex_to_rgb(
-    hex_: str,
-    /,
-    *,
-    return_tuple: bool = False
-) -> Union[List[int], Tuple[int]]:
-    """Converts a hexadecimal color code to RGB.
-
-    :param hex_: The hexadecimal color value to convert.
-    :type hex_: str
-    :param return_tuple: Determines whether to return the colors as a tuple or a list, defaults to False. If False, returns the colors as a list.
-    :type return_tuple: bool, optional
-    :raises TypeError: If any of the arguments are not of the correct type.
-    :raises ValueError: If hex_ is not a valid hex value.
-    :return: The converted RBG values.
-    :rtype: Union[List[int], Tuple[int]]
-    """
-
-    if not isinstance(hex_, str):
-        raise TypeError("hex_to_rgb param 'hex_' must be type 'str'.")
-    if not isinstance(return_tuple, bool):
-        raise TypeError(
-            "hex_to_rgb param 'return_tuple' must be type 'bool'.")
-
-    hex_ = hex_.lstrip('#')
-    verify_hex_number_value(hex_)
-
-    if return_tuple:
-        # taken from John1024 on stackoverflow
-        return tuple(int(hex_[i:i+2], 16) for i in (0, 2, 4))
-    return list(int(hex_[i:i+2], 16) for i in (0, 2, 4))
+from .color_conversion import hex_to_rgb, rgb_to_hex
+from .__utils import verify_rgb_number_value
 
 
 def get_colors(
@@ -106,7 +37,7 @@ def get_colors(
     # value checks
     if not isinstance(txt, str):
         raise TypeError(
-            "get_colors param 'txt' only accepts type 'str'. If using a predefined color from textformatting_vsct, use the color's 'get_rgb' or 'get_hex' method instead.")
+            "get_colors param 'txt' only accepts type 'str'. If using a predefined color, use the color's 'get_rgb' or 'get_hex' method instead.")
     if not isinstance(return_hex, bool):
         raise TypeError(
             "get_colors param 'return_hex' only accepts type 'bool'.")
