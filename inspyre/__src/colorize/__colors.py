@@ -49,17 +49,17 @@ def format_text(
 def colorize_by_rgb(
     txt: str,
     /,
-    fg: Union[List[int], Tuple[int], None] = None,
-    bg: Union[List[int], Tuple[int], None] = None
+    fg: Union[List[Union[int, float]], Tuple[Union[int, float]], None] = None,
+    bg: Union[List[Union[int, float]], Tuple[Union[int, float]], None] = None
 ) -> str:
     """Colorizes the text with the given foreground and background RGB values.
 
     :param txt: The text to be colorized.
     :type txt: str
     :param fg: The foreground RGB value, if desired, defaults to None
-    :type fg: Union[List[int], Tuple[int], None], optional
+    :type fg: Union[List[Union[int, float]], Tuple[Union[int, float]], None], optional
     :param bg: The background RGB value, if desired, defaults to None
-    :type bg: Union[List[int], Tuple[int], None], optional
+    :type bg: Union[List[Union[int, float]], Tuple[Union[int, float]], None], optional
     :raises TypeError: If any of the arguments are not of the correct type.
     :raises ValueError: If the given List(s) or Tuple(s) is the incorrect length.
     :raises ValueError: If the given RGB values are out of the correct range.
@@ -80,20 +80,36 @@ def colorize_by_rgb(
                 "All RGB value args must be a 'List[int]' or 'Tuple[int]' of length 3, or 'None'.")
 
     if fg:
-        rf, gf, bf = fg
-        verify_rgb_number_value(rf)
-        verify_rgb_number_value(gf)
-        verify_rgb_number_value(bf)
-        fg_formatting = f'\x1b[38;2;{rf};{gf};{bf}m'
+        red_fg, green_fg, blue_fg = fg
+        verify_rgb_number_value(red_fg)
+        verify_rgb_number_value(green_fg)
+        verify_rgb_number_value(blue_fg)
+
+        if isinstance(red_fg, float):
+            red_fg = int(red_fg * 255)
+        if isinstance(green_fg, float):
+            green_fg = int(green_fg * 255)
+        if isinstance(blue_fg, float):
+            blue_fg = int(blue_fg * 255)
+
+        fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
     else:
         fg_formatting = ''
 
     if bg:
-        rb, gb, bb = bg
-        verify_rgb_number_value(rb)
-        verify_rgb_number_value(gb)
-        verify_rgb_number_value(bb)
-        bg_formatting = f'\x1b[48;2;{rb};{gb};{bb}m'
+        red_bg, green_bg, blue_bg = bg
+        verify_rgb_number_value(red_bg)
+        verify_rgb_number_value(green_bg)
+        verify_rgb_number_value(blue_bg)
+
+        if isinstance(red_bg, float):
+            red_bg = int(red_bg * 255)
+        if isinstance(green_bg, float):
+            green_bg = int(green_bg * 255)
+        if isinstance(blue_bg, float):
+            blue_bg = int(blue_bg * 255)
+
+        bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
     else:
         bg_formatting = ''
 
@@ -135,15 +151,15 @@ def colorize_by_hex(
 
     if fg:
         verify_hex_number_value(fg)
-        rf, gf, bf = hex_to_rgb(fg)
-        fg_formatting = f'\x1b[38;2;{rf};{gf};{bf}m'
+        red_fg, green_fg, blue_fg = hex_to_rgb(fg)
+        fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
     else:
         fg_formatting = ''
 
     if bg:
         verify_hex_number_value(bg)
-        rb, gb, bb = hex_to_rgb(bg)
-        bg_formatting = f'\x1b[48;2;{rb};{gb};{bb}m'
+        red_bg, green_bg, blue_bg = hex_to_rgb(bg)
+        bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
     else:
         bg_formatting = ''
 
@@ -185,15 +201,15 @@ def colorize_by_hsl(
 
     if fg:
         verify_hsl_value(fg)
-        rf, gf, bf = hex_to_rgb(fg)
-        fg_formatting = f'\x1b[38;2;{rf};{gf};{bf}m'
+        red_fg, green_fg, blue_fg = hex_to_rgb(fg)
+        fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
     else:
         fg_formatting = ''
 
     if bg:
         verify_hsl_value(bg)
-        rb, gb, bb = hex_to_rgb(bg)
-        bg_formatting = f'\x1b[48;2;{rb};{gb};{bb}m'
+        red_bg, green_bg, blue_bg = hex_to_rgb(bg)
+        bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
     else:
         bg_formatting = ''
 

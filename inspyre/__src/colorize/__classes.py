@@ -50,12 +50,15 @@ class PredefinedColor:
     def get_rgb(
         self,
         *,
-        return_tuple: bool = False
+        return_as_floats: bool = False,
+        return_as_tuple: bool = False
     ) -> Union[List[int], Tuple[int]]:
         """Get the RGB color code of the PredefinedColor.
 
-        :param return_tuple: Determines whether to return a tuple or a list, defaults to False.
-        :type return_tuple: bool, optional
+        :param return_as_floats: Determines whether to return the colors as floats or ints, defaults to False.
+        :type return_as_floats: bool, optional
+        :param return_as_tuple: Determines whether to return a tuple or a list, defaults to False.
+        :type return_as_tuple: bool, optional
         :raises ValueError: If self.__value is not a valid ANSI code.
         :return: The RGB color code of the PredefinedColor.
         :rtype: Union[List[int], Tuple[int]]
@@ -66,7 +69,13 @@ class PredefinedColor:
         parts = str(self.__value).split(';')
         if len(parts) == 5:
             r, g, b = parts[2], parts[3], parts[4][:-1]  # removes the 'm'
-            if not return_tuple:
+
+            if return_as_floats:
+                r = float(r) / 255
+                g = float(g) / 255
+                b = float(b) / 255
+
+            if not return_as_tuple:
                 return [int(r), int(g), int(b)]
             return int(r), int(g), int(b)
         else:

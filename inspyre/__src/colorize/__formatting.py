@@ -4,24 +4,33 @@ from re import split as re_split
 from typing import Dict, List, Tuple, Union
 
 from .__classes import PredefinedColor
-from .color_conversion import hex_to_rgb, rgb_to_hex
 from .__utils import verify_rgb_number_value
+from .color_conversion import hex_to_rgb, rgb_to_hex, rgb_to_hsl, rgb_to_hsv
 
 
 def get_colors(
     txt: str,
     /,
     *,
-    return_hex: bool = False,
+    return_as: str = 'rgb',
     include_reset: bool = False,
     include_color_type: bool = False
-) -> List[Dict[str, Union[List[int], str]]]:
+) -> List[Dict[str, Union[List[int], List[float], str]]]:
     """Gets all the colors in the given string and returns them in a list of dictionaries.
 
     :param txt: The text to parse.
     :type txt: str
-    :param return_hex: Determines whether to return the colors as hex, defaults to False. If False, returns the colors as RGB lists.
-    :type return_hex: bool, optional
+    :param return_as: Determines the color type to return, defaults to 'rgb'.
+
+        - supported return color types:
+        - 'rgb' (default)
+        - 'rgb float' / 'rgbf'
+        - 'hex'
+        - 'hsl'
+        - 'hsv'
+        - 'cmyk'
+
+    :type return_as: str, optional
     :param include_reset: Determines whether to include the RESET constant if it is found in the string, defaults to False.
     :type include_reset: bool, optional
     :param include_color_type: Determines whether to include the color type of each color ('FG' or 'BG'), defaults to False.
@@ -38,9 +47,9 @@ def get_colors(
     if not isinstance(txt, str):
         raise TypeError(
             "get_colors param 'txt' only accepts type 'str'. If using a predefined color, use the color's 'get_rgb' or 'get_hex' method instead.")
-    if not isinstance(return_hex, bool):
+    if not isinstance(return_as, str):
         raise TypeError(
-            "get_colors param 'return_hex' only accepts type 'bool'.")
+            "get_colors param 'return_as' only accepts type 'bool'.")
     if not isinstance(include_reset, bool):
         raise TypeError(
             "get_colors param 'include_reset' only accepts type 'bool'.")
@@ -59,8 +68,24 @@ def get_colors(
             color_match = re_match(ansi_color_regex, part)
             if color_match:
                 color_type_code, _, r, g, b = color_match.groups()
-                color = rgb_to_hex(int(r), int(g), int(b)) \
-                    if return_hex else [int(r), int(g), int(b)]
+
+                match return_as.lower():
+                    case 'rgb':
+                        color = [int(r), int(g), int(b)]
+                    case 'rgb float' | 'rgbf':
+                        color = [float(r) / 255, float(g) /
+                                 255, float(b) / 255]
+                    case 'hex':
+                        color = rgb_to_hex(int(r), int(g), int(b))
+                    case 'hsl':
+                        color = rgb_to_hsl(int(r), int(g), int(b))
+                    case 'hsv':
+                        color = rgb_to_hsv(int(r), int(g), int(b))
+                    case 'cmyk':
+                        raise NotImplementedError
+                    case _:
+                        raise ValueError(
+                            f"'{return_as}' is not a supported return color type.")
 
                 if include_color_type:
                     color_type = "FG" if "38" in color_type_code else "BG"
@@ -106,9 +131,9 @@ def gradient(
 
     :param txt: The text to apply the gradient on.
     :type txt: str
-    :param left_color: The leftmost color.
+    :param left_color: The leftmost color. Currently only supports RGB and hex values.
     :type left_color: Union[List[int], Tuple[int], str, PredefinedColor]
-    :param right_color: The rightmost color.
+    :param right_color: The rightmost color. Currently only supports RGB and hex values.
     :type right_color: Union[List[int], Tuple[int], str, PredefinedColor]
     :param color_type: The type of gradient to be applied, defaults to "FG". "FG" for foreground/text, "BG" for background.
 
