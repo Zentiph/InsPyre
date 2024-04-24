@@ -10,8 +10,8 @@ from typing import List, Tuple, Union
 from ..__utils import verify_cmyk_value as _verify_cmyk
 from ..__utils import verify_hsl_value as _verify_hsl
 from ..__utils import verify_rgb_number_value as _verify_rgb
-from .convert_to_rgb import cmyk_to_rgb, hsl_to_rgb, hsv_to_rgb
-from .helpers import normalize_rgb as _normalize_rgb
+from .__convert_to_rgb import cmyk_to_rgb, hsl_to_rgb, hsv_to_rgb
+from .__helpers import normalize_rgb as _normalize_rgb
 
 
 def rgb_to_hex(

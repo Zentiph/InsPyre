@@ -11,7 +11,7 @@ from ..__utils import verify_cmyk_value as _verify_cmyk
 from ..__utils import verify_hex_number_value as _verify_hex
 from ..__utils import verify_hsl_value as _verify_hsl
 from ..__utils import verify_hsv_value as _verify_hsv
-from .helpers import hue_to_rgb as _hue_to_rgb
+from .__helpers import hue_to_rgb as _hue_to_rgb
 
 
 def hex_to_rgb(

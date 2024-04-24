@@ -11,8 +11,8 @@ from ..__utils import verify_cmyk_value as _verify_cmyk
 from ..__utils import verify_hex_number_value as _verify_hex
 from ..__utils import verify_hsv_value as _verify_hsv
 from ..__utils import verify_rgb_number_value as _verify_rgb
-from .convert_to_rgb import cmyk_to_rgb, hex_to_rgb, hsv_to_rgb
-from .helpers import normalize_rgb as _normalize_rgb
+from .__convert_to_rgb import cmyk_to_rgb, hex_to_rgb, hsv_to_rgb
+from .__helpers import normalize_rgb as _normalize_rgb
 
 
 def rgb_to_hsl(

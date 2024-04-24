@@ -1,28 +1,28 @@
 """
-InsPyre.colorize.convert.convert_to_hsv
----------------------------------------
+InsPyre.colorize.convert.convert_to_cmyk
+----------------------------------------
 
-Module for converting color codes to HSV values.
+Module for converting color codes to CMYK values.
 """
 
 from typing import List, Tuple, Union
 
-from ..__utils import verify_cmyk_value as _verify_cmyk
 from ..__utils import verify_hex_number_value as _verify_hex
 from ..__utils import verify_hsl_value as _verify_hsl
+from ..__utils import verify_hsv_value as _verify_hsv
 from ..__utils import verify_rgb_number_value as _verify_rgb
-from .convert_to_rgb import cmyk_to_rgb, hex_to_rgb, hsl_to_rgb
-from .helpers import normalize_rgb as _normalize_rgb
+from .__convert_to_rgb import hex_to_rgb, hsl_to_rgb, hsv_to_rgb
+from .__helpers import normalize_rgb as _normalize_rgb
 
 
-def rgb_to_hsv(
+def rgb_to_cmyk(
     rgb: Union[List[Union[int, float]], Tuple[Union[int, float]]],
     /,
     *,
     decimal_places: int = 2,
     return_as_tuple: bool = False
 ) -> Union[List[float], Tuple[float]]:
-    """Converts an RGB color code to HSV.
+    """Converts an RGB color code to CMYK.
 
     :param rgb: The RGB color value to convert. Accepts either a List or Tuple with three values.
 
@@ -37,7 +37,7 @@ def rgb_to_hsv(
     :type return_as_tuple: bool, optional
     :raises TypeError: If any of the arguments are not of the correct type.
     :raises ValueError: If any of the values in rgb are not valid R, G, or B values.
-    :return: The converted HSV values.
+    :return: The converted CMYK values.
     :rtype: Union[List[float], Tuple[float]]
     """
 
@@ -55,45 +55,34 @@ def rgb_to_hsv(
     for color in (r, g, b):
         _verify_rgb(color)
 
-    r = r / 255
-    g = g / 255
-    b = b / 255
-    max_value = max(r, g, b)
-    min_value = min(r, g, b)
-    delta = max_value - min_value
-    value = max_value
-    saturation = delta / max_value
-
-    if delta == 0:
-        hue = 0.0
-    elif max_value == r:
-        hue = (g - b) / delta % 6
-    elif max_value == g:
-        hue = ((b - r) / delta) + 2
-    elif max_value == b:
-        hue = ((r - g) / delta) + 4
-
-    hue *= 60
-    if hue < 0:
-        hue += 360.0
-
-    hue = round(hue, decimal_places)
-    saturation = round(saturation * 100, decimal_places)
-    value = round(value * 100, decimal_places)
+    r_prime = r / 255
+    g_prime = g / 255
+    b_prime = b / 255
+    k = 1 - max(r_prime, g_prime, b_prime)
+    c = (1 - r_prime - k) / (1 - k) * 100
+    m = (1 - g_prime - k) / (1 - k) * 100
+    y = (1 - b_prime - k) / (1 - k) * 100
+    k *= 100
 
     if return_as_tuple:
-        return (float(hue), float(saturation), float(value))
-    return [float(hue), float(saturation), float(value)]
+        return (float(round(c, decimal_places)),
+                float(round(m, decimal_places)),
+                float(round(y, decimal_places)),
+                float(round(k, decimal_places)))
+    return [float(round(c, decimal_places)),
+            float(round(m, decimal_places)),
+            float(round(y, decimal_places)),
+            float(round(k, decimal_places))]
 
 
-def hex_to_hsv(
+def hex_to_cmyk(
     hex_: str,
     /,
     *,
     decimal_places: int = 2,
     return_as_tuple: bool = False
 ) -> Union[List[float], Tuple[float]]:
-    """Converts a hex color code to HSV.
+    """Converts a hex color code to CMYK.
 
     :param hex_: The hex color value to convert.
     :type rgb: str
@@ -103,7 +92,7 @@ def hex_to_hsv(
     :type return_as_tuple: bool, optional
     :raises TypeError: If any of the arguments are not of the correct type.
     :raises ValueError: If any of the values in rgb are not valid R, G, or B values.
-    :return: The converted HSV values.
+    :return: The converted CMYK values.
     :rtype: Union[List[float], Tuple[float]]
     """
 
@@ -117,17 +106,17 @@ def hex_to_hsv(
     _verify_hex(hex_)
     r, g, b = hex_to_rgb(hex_)
 
-    return rgb_to_hsv([r, g, b], decimal_places=decimal_places, return_as_tuple=return_as_tuple)
+    return rgb_to_cmyk([r, g, b], decimal_places=decimal_places, return_as_tuple=return_as_tuple)
 
 
-def hsl_to_hsv(
+def hsl_to_cmyk(
     hsl: Union[List[Union[int, float]], Tuple[Union[int, float]]],
     /,
     *,
     decimal_places: int = 2,
     return_as_tuple: bool = False
 ) -> Union[List[float], Tuple[float]]:
-    """Converts an HSL color code to HSV.
+    """Converts an HSL color code to CMYK.
 
     :param hsl: The HSL color value to convert. Accepts either a List or Tuple with three values.
 
@@ -140,7 +129,7 @@ def hsl_to_hsv(
     :type return_as_tuple: bool, optional
     :raises TypeError: If any of the arguments are not of the correct type.
     :raises ValueError: If any of the values in hsl are not valid H, S, or L values.
-    :return: The converted HSV values.
+    :return: The converted CMYK values.
     :rtype: Union[List[float], Tuple[float]]
     """
 
@@ -166,54 +155,53 @@ def hsl_to_hsv(
     _verify_hsl(h, s, l)
 
     r, g, b = hsl_to_rgb([h, s, l])
-    return rgb_to_hsv([r, g, b], decimal_places=decimal_places, return_as_tuple=return_as_tuple)
+    return rgb_to_cmyk([r, g, b], decimal_places=decimal_places, return_as_tuple=return_as_tuple)
 
 
-def cmyk_to_hsv(
-    cmyk: Union[List[Union[int, float]], Tuple[Union[int, float]]],
+def hsv_to_cmyk(
+    hsv: Union[List[Union[int, float]], Tuple[Union[int, float]]],
     /,
     *,
     decimal_places: int = 2,
     return_as_tuple: bool = False
-) -> Union[List[Union[int, float]], Tuple[Union[int, float]]]:
-    """Converts a CMYK color code to HSV.
+) -> Union[List[float], Tuple[float]]:
+    """Converts an HSV color code to CMYK.
 
-    :param cmyk: The CMYK color value to convert. Accepts either a List or Tuple with four values.
+    :param hsv: The HSV color value to convert. Accepts either a List or Tuple with three values.
 
-        - each value in cmyk must be a percentage (e.g. 0.0-100.0, not 0.0-1.0)
+        - each value in hsv must be a percentage (e.g. 0.0-100.0, not 0.0-1.0)
 
-    :type cmyk: Union[List[Union[int, float]], Tuple[Union[int, float]]
+    :type hsv: Union[List[Union[int, float]], Tuple[Union[int, float]]
     :param decimal_places: The number of decimal places to round to, defaults to 2.
     :type decimal_places: int, optional
     :param return_as_tuple: Determines if the colors are returned in a tuple, defaults to False.
     :type return_as_tuple: bool, optional
     :raises TypeError: If any of the arguments are not of the correct type.
-    :raises ValueError: If any of the values in cmyk are not valid H, S, or V values.
-    :return: The converted HSV values.
-    :rtype: Union[List[Union[int, float]], Tuple[Union[int, float]]]
+    :raises ValueError: If any of the values in hsv are not valid H, S, or L values.
+    :return: The converted CMYK values.
+    :rtype: Union[List[float], Tuple[float]]
     """
 
-    if len(cmyk) == 4 and isinstance(cmyk, (list, tuple)):
-        for v in cmyk:
+    if len(hsv) == 3 and isinstance(hsv, (list, tuple)):
+        for v in hsv:
             if not isinstance(v, int) and not isinstance(v, float):
                 raise TypeError(
-                    "Each cyan, magenta, yellow, and black value must be 'int' or 'float'.")
-        c, m, y, k = cmyk
+                    "Each hue, saturation, and value value must be 'int' or 'float'.")
+        h, s, l = hsv
 
     else:
         raise TypeError(
-            "cmyk accepts a List or Tuple with four values.")
+            "hsv accepts either a List or Tuple with three values.")
 
     if not isinstance(decimal_places, int):
         raise TypeError("'decimal_places' must be type 'int'.")
     if not isinstance(return_as_tuple, bool):
         raise TypeError("'return_as_tuple' must be type 'bool'.")
 
-    c = float(c)
-    m = float(m)
-    y = float(y)
-    k = float(k)
-    _verify_cmyk(c, m, y, k)
+    h = float(h)
+    s = float(s)
+    l = float(l)
+    _verify_hsv(h, s, l)
 
-    r, g, b = cmyk_to_rgb([c, m, y, k])
-    return rgb_to_hsv([r, g, b], decimal_places=decimal_places, return_as_tuple=return_as_tuple)
+    r, g, b = hsv_to_rgb([h, s, l])
+    return rgb_to_cmyk([r, g, b], decimal_places=decimal_places, return_as_tuple=return_as_tuple)

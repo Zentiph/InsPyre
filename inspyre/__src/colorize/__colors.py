@@ -7,9 +7,11 @@ from typing import List, Tuple, Union
 
 from .__classes import PredefinedColor
 from .__constants import RESET
-from .__utils import (verify_cmyk_value, verify_hex_number_value,
-                      verify_hsl_value, verify_hsv_value,
-                      verify_rgb_number_value)
+from .__utils import verify_cmyk_value as _verify_cmyk
+from .__utils import verify_hex_number_value as _verify_hex
+from .__utils import verify_hsl_value as _verify_hsl
+from .__utils import verify_hsv_value as _verify_hsv
+from .__utils import verify_rgb_number_value as _verify_rgb
 from .convert import cmyk_to_rgb, hex_to_rgb, hsl_to_rgb, hsv_to_rgb
 
 
@@ -82,9 +84,9 @@ def colorize_by_rgb(
 
     if fg:
         red_fg, green_fg, blue_fg = fg
-        verify_rgb_number_value(red_fg)
-        verify_rgb_number_value(green_fg)
-        verify_rgb_number_value(blue_fg)
+        _verify_rgb(red_fg)
+        _verify_rgb(green_fg)
+        _verify_rgb(blue_fg)
 
         if isinstance(red_fg, float):
             red_fg = int(red_fg * 255)
@@ -99,9 +101,9 @@ def colorize_by_rgb(
 
     if bg:
         red_bg, green_bg, blue_bg = bg
-        verify_rgb_number_value(red_bg)
-        verify_rgb_number_value(green_bg)
-        verify_rgb_number_value(blue_bg)
+        _verify_rgb(red_bg)
+        _verify_rgb(green_bg)
+        _verify_rgb(blue_bg)
 
         if isinstance(red_bg, float):
             red_bg = int(red_bg * 255)
@@ -151,14 +153,14 @@ def colorize_by_hex(
                 "All hex value arguments must be a 'str' of length 6 or 7, or 'None'.")
 
     if fg:
-        verify_hex_number_value(fg)
+        _verify_hex(fg)
         red_fg, green_fg, blue_fg = hex_to_rgb(fg)
         fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
     else:
         fg_formatting = ''
 
     if bg:
-        verify_hex_number_value(bg)
+        _verify_hex(bg)
         red_bg, green_bg, blue_bg = hex_to_rgb(bg)
         bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
     else:
@@ -201,14 +203,14 @@ def colorize_by_hsl(
                 "HSL vals must be 'List[int | float]' or 'Tuple[int | float]' of len 3, or 'None'.")
 
     if fg:
-        verify_hsl_value(fg[0], fg[1], fg[2])
+        _verify_hsl(fg[0], fg[1], fg[2])
         red_fg, green_fg, blue_fg = hsl_to_rgb(fg)
         fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
     else:
         fg_formatting = ''
 
     if bg:
-        verify_hsl_value(bg[0], bg[1], bg[2])
+        _verify_hsl(bg[0], bg[1], bg[2])
         red_bg, green_bg, blue_bg = hsl_to_rgb(bg)
         bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
     else:
@@ -251,14 +253,14 @@ def colorize_by_hsv(
                 "HSV vals must be 'List[int | float]' or 'Tuple[int | float]' of len 3, or 'None'.")
 
     if fg:
-        verify_hsv_value(fg[0], fg[1], fg[2])
+        _verify_hsv(fg[0], fg[1], fg[2])
         red_fg, green_fg, blue_fg = hsv_to_rgb(fg)
         fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
     else:
         fg_formatting = ''
 
     if bg:
-        verify_hsv_value(bg[0], bg[1], bg[2])
+        _verify_hsv(bg[0], bg[1], bg[2])
         red_bg, green_bg, blue_bg = hsv_to_rgb(bg)
         bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
     else:
@@ -301,14 +303,14 @@ def colorize_by_cmyk(
                 "CMYK val must be 'List[int | float]' or 'Tuple[int | float]' of len 4, or 'None'.")
 
     if fg:
-        verify_cmyk_value(fg[0], fg[1], fg[2], fg[3])
+        _verify_cmyk(fg[0], fg[1], fg[2], fg[3])
         red_fg, green_fg, blue_fg = cmyk_to_rgb(fg)
         fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
     else:
         fg_formatting = ''
 
     if bg:
-        verify_cmyk_value(bg[0], bg[1], bg[2], bg[3])
+        _verify_cmyk(bg[0], bg[1], bg[2], bg[3])
         red_bg, green_bg, blue_bg = cmyk_to_rgb(bg)
         bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
     else:
