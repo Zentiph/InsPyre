@@ -7,9 +7,10 @@ from typing import List, Tuple, Union
 
 from .__classes import PredefinedColor
 from .__constants import RESET
-from .convert import hex_to_rgb
-from .__utils import (verify_hex_number_value, verify_hsl_value,
+from .__utils import (verify_cmyk_value, verify_hex_number_value,
+                      verify_hsl_value, verify_hsv_value,
                       verify_rgb_number_value)
+from .convert import cmyk_to_rgb, hex_to_rgb, hsl_to_rgb, hsv_to_rgb
 
 
 # color funcs
@@ -169,17 +170,17 @@ def colorize_by_hex(
 def colorize_by_hsl(
     txt: str,
     /,
-    fg: Union[List[float], Tuple[float], None] = None,
-    bg: Union[List[float], Tuple[float], None] = None,
+    fg: Union[List[Union[int, float]], Tuple[Union[int, float]], None] = None,
+    bg: Union[List[Union[int, float]], Tuple[Union[int, float]], None] = None,
 ) -> str:
     """Colorizes the text with the given foreground and background HSL values.
 
     :param txt: The text to be colorized.
     :type txt: str
     :param fg: The foreground HSL value, if desired, defaults to None
-    :type fg: Union[str, None], optional
+    :type fg: Union[int, float], optional
     :param bg: The background HSL value, if desired, defaults to None
-    :type bg: Union[str, None], optional
+    :type bg: Union[int, float], optional
     :raises TypeError: If any of the arguments are not of the correct type.
     :raises ValueError: If the given string(s) are the incorrect length.
     :raises ValueError: If the given HSL values are out of the correct range.
@@ -194,28 +195,126 @@ def colorize_by_hsl(
     for color in fg, bg:
         if not isinstance(color, list) and not isinstance(color, tuple) and color is not None:
             raise TypeError(
-                "'fg' and 'bg' must be type 'List[float]', 'Tuple[float]', or 'None'.")
+                "'fg' and 'bg' must be 'List[int | float]', 'Tuple[int | float]', or 'None'.")
         if color is not None and len(color) != 3:
             raise ValueError(
-                "All HSL value arguments must be a 'List[float]' or 'Tuple[float]' of length 3, or 'None'.")
+                "HSL vals must be 'List[int | float]' or 'Tuple[int | float]' of len 3, or 'None'.")
 
     if fg:
-        verify_hsl_value(fg)
-        red_fg, green_fg, blue_fg = hex_to_rgb(fg)
+        verify_hsl_value(fg[0], fg[1], fg[2])
+        red_fg, green_fg, blue_fg = hsl_to_rgb(fg)
         fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
     else:
         fg_formatting = ''
 
     if bg:
-        verify_hsl_value(bg)
-        red_bg, green_bg, blue_bg = hex_to_rgb(bg)
+        verify_hsl_value(bg[0], bg[1], bg[2])
+        red_bg, green_bg, blue_bg = hsl_to_rgb(bg)
         bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
     else:
         bg_formatting = ''
 
     return fg_formatting + bg_formatting + txt + RESET
 
-# TODO: other colorize funcs
+
+def colorize_by_hsv(
+    txt: str,
+    /,
+    fg: Union[List[Union[int, float]], Tuple[Union[int, float]], None] = None,
+    bg: Union[List[Union[int, float]], Tuple[Union[int, float]], None] = None,
+) -> str:
+    """Colorizes the text with the given foreground and background HSV values.
+
+    :param txt: The text to be colorized.
+    :type txt: str
+    :param fg: The foreground HSV value, if desired, defaults to None
+    :type fg: Union[int, float], optional
+    :param bg: The background HSV value, if desired, defaults to None
+    :type bg: Union[int, float], optional
+    :raises TypeError: If any of the arguments are not of the correct type.
+    :raises ValueError: If the given string(s) are the incorrect length.
+    :raises ValueError: If the given HSV values are out of the correct range.
+    :return: The colorized text.
+    :rtype: str
+    """
+
+    # type checks
+    if not isinstance(txt, str):
+        raise TypeError("'txt' must be type 'str'.")
+
+    for color in fg, bg:
+        if not isinstance(color, list) and not isinstance(color, tuple) and color is not None:
+            raise TypeError(
+                "'fg' and 'bg' must be 'List[int | float]', 'Tuple[int | float]', or 'None'.")
+        if color is not None and len(color) != 3:
+            raise ValueError(
+                "HSV vals must be 'List[int | float]' or 'Tuple[int | float]' of len 3, or 'None'.")
+
+    if fg:
+        verify_hsv_value(fg[0], fg[1], fg[2])
+        red_fg, green_fg, blue_fg = hsv_to_rgb(fg)
+        fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
+    else:
+        fg_formatting = ''
+
+    if bg:
+        verify_hsv_value(bg[0], bg[1], bg[2])
+        red_bg, green_bg, blue_bg = hsv_to_rgb(bg)
+        bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
+    else:
+        bg_formatting = ''
+
+    return fg_formatting + bg_formatting + txt + RESET
+
+
+def colorize_by_cmyk(
+    txt: str,
+    /,
+    fg: Union[List[Union[int, float]], Tuple[Union[int, float]], None] = None,
+    bg: Union[List[Union[int, float]], Tuple[Union[int, float]], None] = None,
+) -> str:
+    """Colorizes the text with the given foreground and background CMYK values.
+
+    :param txt: The text to be colorized.
+    :type txt: str
+    :param fg: The foreground CMYK value, if desired, defaults to None
+    :type fg: Union[int, float], optional
+    :param bg: The background CMYK value, if desired, defaults to None
+    :type bg: Union[int, float], optional
+    :raises TypeError: If any of the arguments are not of the correct type.
+    :raises ValueError: If the given string(s) are the incorrect length.
+    :raises ValueError: If the given CMYK values are out of the correct range.
+    :return: The colorized text.
+    :rtype: str
+    """
+
+    # type checks
+    if not isinstance(txt, str):
+        raise TypeError("'txt' must be type 'str'.")
+
+    for color in fg, bg:
+        if not isinstance(color, list) and not isinstance(color, tuple) and color is not None:
+            raise TypeError(
+                "'fg' and 'bg' must be 'List[int | float]', 'Tuple[int | float]', or 'None'.")
+        if color is not None and len(color) != 4:
+            raise ValueError(
+                "CMYK val must be 'List[int | float]' or 'Tuple[int | float]' of len 4, or 'None'.")
+
+    if fg:
+        verify_cmyk_value(fg[0], fg[1], fg[2], fg[3])
+        red_fg, green_fg, blue_fg = cmyk_to_rgb(fg)
+        fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
+    else:
+        fg_formatting = ''
+
+    if bg:
+        verify_cmyk_value(bg[0], bg[1], bg[2], bg[3])
+        red_bg, green_bg, blue_bg = cmyk_to_rgb(bg)
+        bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
+    else:
+        bg_formatting = ''
+
+    return fg_formatting + bg_formatting + txt + RESET
 
 
 # color classes
@@ -272,8 +371,7 @@ class ColorLib:
                     f'{color} is not a valid color of {self.__class__.__name__}.')
 
         else:
-            raise TypeError(
-                f"'color' must be type 'str'.")
+            raise TypeError("'color' must be type 'str'.")
 
     def compare_colors(
         self,
