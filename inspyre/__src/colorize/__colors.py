@@ -7,7 +7,7 @@ from typing import List, Tuple, Union
 
 from .__classes import PredefinedColor
 from .__constants import RESET
-from .color_conversion import hex_to_rgb
+from .convert import hex_to_rgb
 from .__utils import (verify_hex_number_value, verify_hsl_value,
                       verify_rgb_number_value)
 

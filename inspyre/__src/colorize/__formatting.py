@@ -5,7 +5,7 @@ from typing import Dict, List, Tuple, Union
 
 from .__classes import PredefinedColor
 from .__utils import verify_rgb_number_value
-from .color_conversion import hex_to_rgb, rgb_to_hex, rgb_to_hsl, rgb_to_hsv
+from .convert import hex_to_rgb, rgb_to_hex, rgb_to_hsl, rgb_to_hsv
 
 
 def get_colors(

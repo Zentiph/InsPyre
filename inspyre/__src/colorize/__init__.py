@@ -1,4 +1,4 @@
-from . import color_conversion
+from . import convert
 from .__colors import (BGColors, TextColors, colorize_by_hex, colorize_by_rgb,
                        format_text)
 from .__constants import RESET
