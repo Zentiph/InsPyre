@@ -82,6 +82,9 @@ def colorize_by_rgb(
             raise ValueError(
                 "All RGB value args must be a 'List[int]' or 'Tuple[int]' of length 3, or 'None'.")
 
+    fg_formatting = ''
+    bg_formatting = ''
+
     if fg:
         red_fg, green_fg, blue_fg = fg
         _verify_rgb(red_fg)
@@ -96,8 +99,6 @@ def colorize_by_rgb(
             blue_fg = int(blue_fg * 255)
 
         fg_formatting = f'\x1b[38;2;{red_fg};{green_fg};{blue_fg}m'
-    else:
-        fg_formatting = ''
 
     if bg:
         red_bg, green_bg, blue_bg = bg
@@ -113,8 +114,6 @@ def colorize_by_rgb(
             blue_bg = int(blue_bg * 255)
 
         bg_formatting = f'\x1b[48;2;{red_bg};{green_bg};{blue_bg}m'
-    else:
-        bg_formatting = ''
 
     return fg_formatting + bg_formatting + txt + RESET
 
@@ -321,7 +320,7 @@ def colorize_by_cmyk(
 
 # color classes
 class ColorLib:
-    """Base class for color library classes.
+    """Parent class for color library classes.
     """
 
     def is_color(
@@ -393,7 +392,7 @@ class ColorLib:
 
 
 class TextColors(ColorLib):
-    """Text color library class.
+    """Text color library class. Child of ColorLib.
     """
 
     # reds
@@ -558,7 +557,7 @@ class TextColors(ColorLib):
 
 
 class BGColors(ColorLib):
-    """Background color library class.
+    """Background color library class. Child of ColorLib.
     """
 
     # reds
