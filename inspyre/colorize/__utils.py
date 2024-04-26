@@ -1,4 +1,4 @@
-from re import compile
+from re import compile as re_compile
 from typing import Union
 
 
@@ -158,9 +158,9 @@ def verify_ansi_code(ansi_code: str) -> None:
     if not isinstance(ansi_code, str):
         raise TypeError("ANSI code must be type 'str'.")
 
-    standard_color_pattern = compile(
+    standard_color_pattern = re_compile(
         r'\x1b\[(?:3[0-7]|4[0-7]|9[0-7]|10[0-7])m')
-    rgb_color_pattern = compile(
+    rgb_color_pattern = re_compile(
         r'\x1b\[(38|48);2;(\d{1,3});(\d{1,3});(\d{1,3})m')
 
     match = rgb_color_pattern.match(ansi_code)
