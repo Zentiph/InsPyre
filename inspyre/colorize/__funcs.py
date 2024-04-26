@@ -441,7 +441,7 @@ def gradient(
     txt: str,
     /,
     *colors: PredefinedColor,
-    color_type: str = 'FG'
+    bg: bool = False
 ) -> str:
     """Applies a gradient effect to the text. Automatically appends the END_FORMAT constant.
 
@@ -454,13 +454,12 @@ def gradient(
     :param txt: The text to apply the gradient on.
     :type txt: str
     :param colors: The colors to use in the gradient.
-    :param color_type: The type of gradient to be applied, defaults to "FG".
+    :param bg: Decides if the gradient should be applied to the BG, defaults to False.
 
-        - Use "FG" for foreground/text, "BG" for background.
         - Note: Predefined colors from the package do not determine the gradient type.
-        - e.g. using two colors from BGColors with color_type='FG' will apply an fg gradient.
+        - e.g. using two colors from BGColors with bg=False will apply an FG gradient.
 
-    :type color_type: str, optional
+    :type bg: bool, optional
     :raises TypeError: If any of the arguments are not of the correct type.
     :raises ValueError: If the colors provided are not valid values of their respective color types.
     :return: The text string with the gradient applied.
@@ -470,24 +469,21 @@ def gradient(
     # value checks
     if not isinstance(txt, str):
         raise TypeError("'txt' only accepts type 'str'.")
-    if not isinstance(color_type, str):
-        raise TypeError("'color_type' only accepts type 'str'.")
+    if not isinstance(bg, bool):
+        raise TypeError("'bg' only accepts type 'bool'.")
 
-    if color_type.lower().startswith('f'):
-        ansi_template = '\x1b[38;2;{};{};{}m'
-    elif color_type.lower().startswith('b'):
-        ansi_template = '\x1b[48;2;{};{};{}m'
-    else:
+    ansi_template = '\x1b[48;2;{};{};{}m' if bg else '\x1b[38;2;{};{};{}m'
+
+    if len(txt) < len(colors):
         raise ValueError(
-            "'color_type' only accepts strings starting with 'f' or 'b'.")
-
+            "'txt' cannot be shorter than the number of colors provided.")
     if len(colors) < 2:
         raise ValueError(
             "'colors' cannot contain less than 2 colors.")
     for color in colors:
         if not isinstance(color, PredefinedColor):
             raise TypeError(
-                "'colors' only accepts 'PredefinedColor'.")
+                "'colors' may only contain 'PredefinedColor'.")
 
     # calculates the number of chars each color will cover
     span = len(txt) / (len(colors) - 1)
@@ -505,20 +501,17 @@ def gradient(
         chars_added = 0
         # iterate over each color transition
         for i in range(len(colors) - 1):
-            start_rgb = colors[i].get_rgb()
-            end_rgb = colors[i + 1].get_rgb()
-
             steps = [(end - start) / span
-                     for start, end in zip(start_rgb, end_rgb)]
+                     for start, end in zip(colors[i].get_rgb(), colors[i + 1].get_rgb())]
+            #                                 ^ start RGB ^             ^ end RGB ^
 
             # apply colors
             for j in range(int(span)):
                 if (i * int(span) + j) >= len(txt):
                     break
 
-                r = int(start_rgb[0] + steps[0] * j)
-                g = int(start_rgb[1] + steps[1] * j)
-                b = int(start_rgb[2] + steps[2] * j)
+                r, g, b = [int(colors[i].get_rgb()[k] + steps[k] * j)
+                           for k in range(3)]
 
                 gradient_text += ansi_template.format(r, g, b) \
                     + txt[i * int(span) + j]
@@ -531,5 +524,5 @@ def gradient(
     gradient_text += ansi_template.format(r, g, b) + txt[chars_added:]
 
     # add END_FORMAT
-    gradient_text += '\x1b[0m'
+    gradient_text += END_FORMAT
     return gradient_text
