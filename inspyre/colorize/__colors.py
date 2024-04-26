@@ -305,7 +305,7 @@ class ColorLib:
             self.print_color_sample(color, msg=msg)
 
 
-class TextColors(ColorLib):
+class FGColors(ColorLib):
     """Text color library class. Child of ColorLib.
     """
 

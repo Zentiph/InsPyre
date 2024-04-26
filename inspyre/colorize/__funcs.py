@@ -446,6 +446,8 @@ def gradient(
     color_type: str = 'FG'
 ) -> str:
     """Applies a gradient effect to the text. Automatically appends the END_FORMAT constant.
+    NOTE: Applying a gradient effect twice will result in a mangled string.
+    To prevent this, utilize the remove_formatting() function before applying a new gradient.
 
     :param txt: The text to apply the gradient on.
     :type txt: str
@@ -481,31 +483,31 @@ def gradient(
         escape_code_template = '\x1b[48;2;{};{};{}m'
     else:
         raise ValueError(
-            "'color_type' only accepts strings starting with 't' or 'b'.")
+            "'color_type' only accepts strings starting with 'f' or 'b'.")
 
     if isinstance(start, PredefinedColor):
-        start = start.get_rgb()
+        start_rgb = start.get_rgb()
     else:
         raise TypeError(
-            "'start' only accepts type 'list[int]', 'tuple[int]', or 'str'.")
+            "'start' only accepts 'PredefinedColor'.")
 
     if isinstance(end, PredefinedColor):
-        end = end.get_rgb()
+        end_rgb = end.get_rgb()
     else:
         raise TypeError(
-            "'end' only accepts type 'list[int]', 'tuple[int]', or 'str'.")
+            "'end' only accepts 'PredefinedColor'.")
 
     # calculates the step for each color component based on the text length
-    steps = [(end - start) / (len(txt) - 1)
-             for start, end in zip(start, end)]
+    steps = [(end_rgb - start_rgb) / (len(txt) - 1)
+             for start_rgb, end_rgb in zip(start_rgb, end_rgb)]
 
     gradient_text = ''
 
     for i, char in enumerate(txt):
         # calculates intermediate RGB values for each char
-        r = int(start[0] + steps[0] * i)
-        g = int(start[1] + steps[1] * i)
-        b = int(start[2] + steps[2] * i)
+        r = int(start_rgb[0] + steps[0] * i)
+        g = int(start_rgb[1] + steps[1] * i)
+        b = int(start_rgb[2] + steps[2] * i)
 
         gradient_text += escape_code_template.format(r, g, b) + char
 
