@@ -444,8 +444,12 @@ def gradient(
     color_type: str = 'FG'
 ) -> str:
     """Applies a gradient effect to the text. Automatically appends the END_FORMAT constant.
-    NOTE: Applying a gradient effect twice will result in a mangled string.
-    To prevent this, utilize the remove_formatting() function before applying a new gradient.
+
+    NOTES:
+        - Applying a gradient effect twice will result in a mangled string.
+        To prevent this, utilize the remove_formatting() function before applying a new gradient.
+        - The final character may not exactly match the final color,
+        due to the color value changing linearly from character to character.
 
     :param txt: The text to apply the gradient on.
     :type txt: str
@@ -489,30 +493,42 @@ def gradient(
     span = len(txt) / (len(colors) - 1)
     gradient_text = ''
 
-    # iterate over each color transition
-    for i, color in enumerate(colors):
-        start_rgb = color.get_rgb()
-        try:
+    if span == 1:
+        for i, char in enumerate(txt):
+            gradient_text += ansi_template.format(
+                colors[i].get_rgb()[0],
+                colors[i].get_rgb()[1],
+                colors[i].get_rgb()[2]
+            ) + char
+
+    else:
+        chars_added = 0
+        # iterate over each color transition
+        for i in range(len(colors) - 1):
+            start_rgb = colors[i].get_rgb()
             end_rgb = colors[i + 1].get_rgb()
-        except IndexError:
-            end_rgb = colors[-1].get_rgb()
-        steps = [(end - start) / span
-                 for start, end in zip(start_rgb, end_rgb)]
 
-        # apply colors
-        for j in range(int(span)):
-            if (i * int(span) + j) >= len(txt):
-                break
+            steps = [(end - start) / span
+                     for start, end in zip(start_rgb, end_rgb)]
 
-            r = int(start_rgb[0] + steps[0] * j)
-            g = int(start_rgb[1] + steps[1] * j)
-            b = int(start_rgb[2] + steps[2] * j)
+            # apply colors
+            for j in range(int(span)):
+                if (i * int(span) + j) >= len(txt):
+                    break
 
-            gradient_text += ansi_template.format(r, g, b) \
-                + txt[i * int(span) + j]
+                r = int(start_rgb[0] + steps[0] * j)
+                g = int(start_rgb[1] + steps[1] * j)
+                b = int(start_rgb[2] + steps[2] * j)
 
-    # add leftover chars in case txt is too short for the amount of colors
-    gradient_text += txt[len(gradient_text):]
+                gradient_text += ansi_template.format(r, g, b) \
+                    + txt[i * int(span) + j]
+                chars_added += 1
+
+    # add any characters that were leftover
+    # due to span being a float
+    # (caused by imperfect color transitions due to linear and integer RGB value addition)
+    r, g, b = colors[-1].get_rgb()
+    gradient_text += ansi_template.format(r, g, b) + txt[chars_added:]
 
     # add END_FORMAT
     gradient_text += '\x1b[0m'
