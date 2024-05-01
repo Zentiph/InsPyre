@@ -7,7 +7,7 @@ from re import match as re_match
 from re import split as re_split
 from typing import Dict, List, Tuple, Union
 
-from .__colors import END_FORMAT, PredefinedColor
+from .__colors import END_FORMAT
 from .__utils import verify_cmyk_value as _verify_cmyk
 from .__utils import verify_hex_number_value as _verify_hex
 from .__utils import verify_hsl_value as _verify_hsl
@@ -22,16 +22,15 @@ from .convert import (cmyk_to_rgb, hex_to_rgb, hsl_to_rgb, hsv_to_rgb,
 def format_text(
     txt: str,
     /,
-    *formats: PredefinedColor
+    *formats: str
 ) -> str:
-    """Formats a string with the color or styles given.
-    Supports any predefined ANSI values from the TextColors, BGColors, and Styles classes,
-    as well as user defined ANSI values via the AnsiFormat class.
+    """Formats a string with the colors and/or styles given.
+    Supports any predefined ANSI values from the TextColors, BGColors, and Styles classes.
 
     :param txt: The text to be formatted.
     :type txt: str
     :param formats: The formats to apply to the text.
-    :type formats: Union[PredefinedColor, List[int], str]
+    :type formats: str
     :raises TypeError: If any of the arguments are not of the correct type.
     :return: The formatted text.
     :rtype: str
@@ -43,9 +42,9 @@ def format_text(
 
     formatting = ''
     for format_ in formats:
-        if not isinstance(format_, PredefinedColor):
+        if not isinstance(format_, str):
             raise TypeError(
-                "Each item in 'formats' must be type 'PredefinedColor'.")
+                "Each txt in 'formats' must be type 'str'.")
 
         formatting += format_
 
@@ -440,7 +439,7 @@ def remove_formatting(
 def gradient(
     txt: str,
     /,
-    *colors: PredefinedColor,
+    *colors: str,
     bg: bool = False
 ) -> str:
     """Applies a gradient effect to the text. Automatically appends the END_FORMAT constant.
@@ -454,9 +453,10 @@ def gradient(
     :param txt: The text to apply the gradient on.
     :type txt: str
     :param colors: The colors to use in the gradient.
+    :type colors: str
     :param bg: Decides if the gradient should be applied to the BG, defaults to False.
 
-        - Note: Predefined colors from the package do not determine the gradient type.
+        - Note: Predefined colors do not determine the gradient type.
         - e.g. using two colors from BGColors with bg=False will apply an FG gradient.
 
     :type bg: bool, optional
@@ -481,9 +481,9 @@ def gradient(
         raise ValueError(
             "'colors' cannot contain less than 2 colors.")
     for color in colors:
-        if not isinstance(color, PredefinedColor):
+        if not isinstance(color, str):
             raise TypeError(
-                "'colors' may only contain 'PredefinedColor'.")
+                "'colors' may only contain 'str'.")
 
     # calculates the number of chars each color will cover
     span = len(txt) / (len(colors) - 1)
@@ -492,9 +492,9 @@ def gradient(
     if span == 1:
         for i, char in enumerate(txt):
             gradient_text += ansi_template.format(
-                colors[i].get_rgb()[0],
-                colors[i].get_rgb()[1],
-                colors[i].get_rgb()[2]
+                get_colors(colors[i])[0]['color'],
+                get_colors(colors[i])[0]['color'],
+                get_colors(colors[i])[0]['color']
             ) + char
 
     else:
@@ -502,15 +502,16 @@ def gradient(
         # iterate over each color transition
         for i in range(len(colors) - 1):
             steps = [(end - start) / span
-                     for start, end in zip(colors[i].get_rgb(), colors[i + 1].get_rgb())]
-            #                                 ^ start RGB ^             ^ end RGB ^
+                     for start, end in
+                     zip(get_colors(colors[i])[0]['color'], get_colors(colors[i + 1])[0]['color'])]
+            #                     ^ start RGB ^                       ^ end RGB ^
 
             # apply colors
             for j in range(int(span)):
                 if (i * int(span) + j) >= len(txt):
                     break
 
-                r, g, b = [int(colors[i].get_rgb()[k] + steps[k] * j)
+                r, g, b = [int(get_colors(colors[i])[0]['color'][k] + steps[k] * j)
                            for k in range(3)]
 
                 gradient_text += ansi_template.format(r, g, b) \
@@ -520,9 +521,49 @@ def gradient(
     # add any characters that were leftover
     # due to span being a float
     # (caused by imperfect color transitions due to linear and integer RGB value addition)
-    r, g, b = colors[-1].get_rgb()
+    r, g, b = get_colors(colors[-1])[0]['color']
     gradient_text += ansi_template.format(r, g, b) + txt[chars_added:]
 
     # add END_FORMAT
     gradient_text += END_FORMAT
     return gradient_text
+
+
+def change_brightness(  # FIXME:
+    self,
+    percentage: float
+) -> None:
+    """Adjust the brightness of the color by a specified percentage.
+    Positive percentage increases the brightness, while negative percentage decreases it.
+
+    :param percentage: The percentage to adjust the brightness by.
+
+        - if percentage > 0: brightness increases
+        - if percentage < 0: brightness decreases
+        - if percentage == 0: brightness will not change 
+
+    :type percentage: float
+    :raises TypeError: If the argument is not of the correct type.
+    """
+
+    if not isinstance(percentage, float):
+        raise TypeError(
+            ".change_brightness only accepts percentages of type 'float'.")
+
+    if "38" in self.main_code:
+        color_type = "38"
+    elif "48" in self.main_code:
+        color_type = "48"
+
+    #! r, g, b = _get_colors(self.main_code)
+    #! adjustment_factor = 1 + (percentage / 100.0)
+
+    # using mins and maxes to stop the values from exceeding the regular RGB range (0-255)
+    #! r = min(max(int(r * adjustment_factor), 0), 255)
+    #! g = min(max(int(g * adjustment_factor), 0), 255)
+    #! b = min(max(int(b * adjustment_factor), 0), 255)
+
+    #! new_code = f"\x1b[{color_type};2;{r};{g};{b}m"
+
+    self._prev_code = self.main_code
+    #! self.main_code = new_code

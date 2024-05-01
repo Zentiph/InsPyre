@@ -146,32 +146,71 @@ def verify_cmyk_value(
         raise ValueError("black must be a float from 0.0-100.0.")
 
 
-def verify_ansi_code(ansi_code: str) -> None:
+# NOTE: not deleing below because could be useful for terminal/cursor module
+
+def find_ansi_codes(ansi_str: str):
+    """INTERNAL FUNCTION. Searches for all ANSI codes in the string and returns them.
+
+    :param ansi_str: The string to search.
+    :type ansi_str: str
+    """
+
+    pattern = re_compile(r'(\x1b\[[^m]*m)')
+    codes = pattern.findall(ansi_str)
+    return codes
+
+
+def _verify_cursor_movement_pattern(ansi_code: str) -> bool:
+    """INTERNAL FUNCTION. Raises ValueError if the ANSI code is not valid.
+
+    :param ansi_code: The ANSI code to check.
+    :type ansi_code: str
+    :raises ValueError: If ansi_code is not correctly formatted.
+    :return: Whether the code matches the cursor movement pattern.
+    :rtype: bool
+    """
+
+    cursor_movement_pattern = re_compile(r'\x1b\[(\d+;)*\d*[ABCDEFGHJKSTfnsu]')
+
+    if cursor_movement_pattern.match(ansi_code):
+        return True
+    return False
+
+
+def _verify_mode_setting_pattern(ansi_code: str) -> bool:
+    """INTERNAL FUNCTION. Raises ValueError if the ANSI code is not valid.
+
+    :param ansi_code: The ANSI code to check.
+    :type ansi_code: str
+    :raises ValueError: If ansi_code is not correctly formatted.
+    :return: Whether the code matches the mode setting pattern.
+    :rtype: bool
+    """
+
+    mode_setting_pattern = re_compile(r'\x1b\[(\?=)?\d+(;\d+)*[hl]')
+
+    if mode_setting_pattern.match(ansi_code):
+        return True
+    return False
+
+
+def verify_ansi_code(ansi_code: str) -> str:
     """INTERNAL FUNCTION. Raises ValueError if the ANSI code is not valid.
 
     :param ansi_code: The ANSI code to check.
     :type ansi_code: str
     :raises TypeError: If ansi_code is not of the correct type.
     :raises ValueError: If ansi_code is not correctly formatted.
+    :return: The ANSI code type.
+    :rtype: str
     """
 
     if not isinstance(ansi_code, str):
         raise TypeError("ANSI code must be type 'str'.")
 
-    standard_color_pattern = re_compile(
-        r'\x1b\[(?:3[0-7]|4[0-7]|9[0-7]|10[0-7])m')
-    rgb_color_pattern = re_compile(
-        r'\x1b\[(38|48);2;(\d{1,3});(\d{1,3});(\d{1,3})m')
+    if _verify_cursor_movement_pattern(ansi_code):
+        return "cur_mov"
+    if _verify_mode_setting_pattern(ansi_code):
+        return "mod_set"
 
-    match = rgb_color_pattern.match(ansi_code)
-    if match:
-        r, g, b = map(int, match.groups()[1:])
-
-        for value in r, g, b:
-            if not 0 <= value <= 255:
-                raise ValueError(
-                    f"RGB value out of range in ANSI code: {ansi_code}.")
-
-    if not standard_color_pattern.match(ansi_code) and not rgb_color_pattern.match(ansi_code):
-        raise ValueError(
-            f"Incorrect ANSI code formatting. Got: {ansi_code!r}. Expected format: standard color code or 24-bit RGB color code.")
+    raise ValueError("ANSI code is not correctly formatted.")
